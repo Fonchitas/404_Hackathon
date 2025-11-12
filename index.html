@@ -1,1 +1,232 @@
-hola chiquets
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Error 404 - Marte con grietas y ventana</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background: black;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  /* Degradado */
+  canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+
+  /* Grietas PNG */
+  .crack {
+    position: absolute;
+    pointer-events: none;
+    z-index: 6;
+    width: 250px;
+    height: 250px;
+    transform: translate(-50%, -50%) rotate(0deg);
+    opacity: 1;
+    user-select: none;
+  }
+
+  /* PNG de cristales al romper */
+  .broken-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 8; /* debajo de la ventana, encima del degradado */
+    pointer-events: none;
+    background: url('https://ik.imagekit.io/k0qx6odcz/cristales%20(1).png?updatedAt=1762966034594') center center no-repeat;
+    background-size: cover;
+    display: none; /* invisible hasta el 7º click */
+  }
+
+  /* PNG ventana de nave */
+  .window-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none;
+    background: url('https://ik.imagekit.io/k0qx6odcz/ventana%20espacial.png?updatedAt=1762964045170') center center no-repeat;
+    background-size: cover;
+  }
+
+  /* Texto 404 */
+  .error-text {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 10vw;
+    font-weight: 900;
+    z-index: 15;
+    text-shadow: 0 0 60px rgba(255,255,255,0.6);
+    letter-spacing: 3px;
+    text-align: center;
+  }
+
+  /* Texto adicional */
+  .message-text {
+    position: absolute;
+    top: 60%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 2vw;
+    font-weight: 900;
+    z-index: 15;
+    text-align: center;
+    text-shadow: 0 0 60px rgba(255,255,255,0.6);
+  }
+</style>
+</head>
+<body>
+  <!-- Degradado animado -->
+  <canvas id="gradient"></canvas>
+
+  <!-- PNG ventana de nave -->
+  <div class="window-overlay"></div>
+
+  <!-- PNG cristales que aparece al romper -->
+  <div class="broken-overlay"></div>
+
+  <!-- Texto 404 -->
+  <div class="error-text">404</div>
+
+  <!-- Texto adicional -->
+  <div class="message-text">
+    ¡Tu nave se ha estrellado!, ¡Haz click para romper la ventana y escapar!
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+
+  <!-- Shaders -->
+  <script id="vertexShader" type="x-shader/x-vertex">
+    varying vec2 vUv;
+    uniform float uTime;
+    void main() {
+      vUv = uv;
+      vec3 pos = position;
+      pos.x += sin(pos.y * 4.0 + uTime * 0.3) * 0.1;
+      pos.y += cos(pos.x * 3.0 + uTime * 0.4) * 0.1;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+    }
+  </script>
+
+  <script id="fragmentShader" type="x-shader/x-fragment">
+    varying vec2 vUv;
+    uniform float uTime;
+    float random(vec2 p) { return fract(sin(dot(p, vec2(12.9898,78.233))) * 43758.5453);}
+    float noise(vec2 p){vec2 i=floor(p);vec2 f=fract(p);float a=random(i);float b=random(i+vec2(1.0,0.0));float c=random(i+vec2(0.0,1.0));float d=random(i+vec2(1.0,1.0));vec2 u=f*f*(3.0-2.0*f);return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;}
+    void main(){
+      vec2 uv=vUv*2.0-1.0;
+      float t=uTime*0.25;
+      float len=length(uv);
+      float wave=sin(len*6.0-t*2.0)*0.4+0.6;
+      vec3 c1=vec3(1.0,0.3,0.1);
+      vec3 c2=vec3(1.0,0.5,0.1);
+      vec3 c3=vec3(0.8,0.35,0.1);
+      vec3 c4=vec3(0.0,0.0,0.0);
+      vec3 base=mix(c1,c2,wave);
+      base=mix(base,c3,sin(uv.x*3.0+t)*0.5+0.5);
+      base=mix(base,c4,0.2);
+      float grain=random(uv*10.0+t*10.0)*0.15;
+      grain+=noise(uv*5.0+t)*0.1;
+      base+=grain;
+      base=pow(base,vec3(1.2));
+      gl_FragColor=vec4(base,1.0);
+    }
+  </script>
+
+  <!-- Three.js degradado -->
+  <script>
+    const scene = new THREE.Scene();
+    const camera = new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+    const renderer = new THREE.WebGLRenderer({canvas:document.getElementById('gradient')});
+    renderer.setSize(window.innerWidth,window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    const geometry=new THREE.PlaneGeometry(2,2);
+    const material=new THREE.ShaderMaterial({
+      uniforms:{uTime:{value:0}},
+      vertexShader:document.getElementById('vertexShader').textContent,
+      fragmentShader:document.getElementById('fragmentShader').textContent
+    });
+    const mesh=new THREE.Mesh(geometry,material);
+    scene.add(mesh);
+    function animate(time){material.uniforms.uTime.value=time*0.001;renderer.render(scene,camera);requestAnimationFrame(animate);}
+    animate();
+    window.addEventListener('resize',()=>{
+      renderer.setSize(window.innerWidth,window.innerHeight);
+    });
+  </script>
+
+  <!-- Grietas y cambio de texto al 7º click -->
+  <script>
+    const crackImages = [
+      'https://ik.imagekit.io/k0qx6odcz/_Pngtree_glass%20crack%20broken%20glass%20mirror_6813123.png?updatedAt=1762964675210',
+      'https://ik.imagekit.io/k0qx6odcz/_Pngtree_glass%20crack%20broken%20glass%20transparent_6813130.png?updatedAt=1762964675217'
+    ];
+
+    let clickCount = 0;
+    let cracksEnabled = true;
+
+    const brokenOverlay = document.querySelector('.broken-overlay');
+    const messageText = document.querySelector('.message-text');
+
+    function createCrack(clickX, clickY) {
+      if (!cracksEnabled) return;
+
+      clickCount++;
+
+      if (clickCount === 7) {
+        // Eliminar todas las grietas
+        const cracks = document.querySelectorAll('.crack');
+        cracks.forEach(c => c.remove());
+
+        // Mostrar PNG de cristales
+        brokenOverlay.style.display = 'block';
+
+        // Cambiar el texto a mensaje de éxito
+        messageText.textContent = '¡Felicidades, has conseguido escapar!';
+
+        // Desactivar más clicks de grietas
+        cracksEnabled = false;
+        return;
+      }
+
+      const img = document.createElement('img');
+      img.src = crackImages[Math.floor(Math.random() * crackImages.length)];
+      img.className = 'crack';
+
+      img.style.left = `${clickX}px`;
+      img.style.top = `${clickY}px`;
+
+      const rotation = Math.random() * 360;
+      img.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+
+      const scale = Math.random() * 0.7 + 1.3;
+      img.style.width = `${250 * scale}px`;
+      img.style.height = `${250 * scale}px`;
+
+      document.body.appendChild(img);
+    }
+
+    window.addEventListener('click', (e) => {
+      createCrack(e.clientX, e.clientY);
+    });
+  </script>
+</body>
+</html>
