@@ -14,7 +14,6 @@
     font-family: 'Poppins', sans-serif;
   }
 
-  /* Degradado */
   canvas {
     position: fixed;
     top: 0;
@@ -24,7 +23,6 @@
     z-index: 0;
   }
 
-  /* Grietas PNG */
   .crack {
     position: absolute;
     pointer-events: none;
@@ -36,21 +34,19 @@
     user-select: none;
   }
 
-  /* PNG de cristales al romper */
   .broken-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 8; /* debajo de la ventana, encima del degradado */
+    z-index: 8;
     pointer-events: none;
     background: url('https://ik.imagekit.io/k0qx6odcz/cristales%20(1).png?updatedAt=1762966034594') center center no-repeat;
     background-size: cover;
-    display: none; /* invisible hasta el 7º click */
+    display: none;
   }
 
-  /* PNG ventana de nave */
   .window-overlay {
     position: fixed;
     top: 0;
@@ -63,7 +59,6 @@
     background-size: cover;
   }
 
-  /* Texto 404 */
   .error-text {
     position: absolute;
     top: 40%;
@@ -76,9 +71,9 @@
     text-shadow: 0 0 60px rgba(255,255,255,0.6);
     letter-spacing: 3px;
     text-align: center;
+    transition: all 0.5s ease;
   }
 
-  /* Texto adicional */
   .message-text {
     position: absolute;
     top: 60%;
@@ -90,24 +85,56 @@
     z-index: 15;
     text-align: center;
     text-shadow: 0 0 60px rgba(255,255,255,0.6);
+    transition: all 0.5s ease;
   }
+
+  /* Animaciones de alarma */
+  @keyframes alarmBlink {
+    0%, 50%, 100% { color: white; text-shadow: 0 0 60px rgba(255,255,255,0.6); }
+    25%, 75% { color: red; text-shadow: 0 0 80px rgba(255,0,0,1); }
+  }
+
+  @keyframes shake {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    25% { transform: translate(-48%, -52%) rotate(-1deg); }
+    50% { transform: translate(-50%, -50%) rotate(1deg); }
+    75% { transform: translate(-52%, -48%) rotate(-1deg); }
+    100% { transform: translate(-50%, -50%) rotate(0deg); }
+  }
+
+  .error-text.alarm {
+    animation: alarmBlink 0.5s infinite, shake 0.3s infinite;
+  }
+
+  .message-text.alarm {
+    animation: alarmBlink 0.5s infinite, shake 0.3s infinite;
+  }
+
+  body.alarm::before {
+    content: '';
+    position: fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background: rgba(255,0,0,0.2);
+    pointer-events:none;
+    animation: alarmBlink 0.5s infinite;
+    z-index:14;
+  }
+
+  /* Estilo de éxito */
+  .success {
+    color: #00ff00; /* verde brillante */
+    text-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00;
+  }
+
 </style>
 </head>
-<body>
-  <!-- Degradado animado -->
+<body class="alarm">
   <canvas id="gradient"></canvas>
-
-  <!-- PNG ventana de nave -->
   <div class="window-overlay"></div>
-
-  <!-- PNG cristales que aparece al romper -->
   <div class="broken-overlay"></div>
-
-  <!-- Texto 404 -->
-  <div class="error-text">404</div>
-
-  <!-- Texto adicional -->
-  <div class="message-text">
+  <div class="error-text alarm">404</div>
+  <div class="message-text alarm">
     ¡Tu nave se ha estrellado!, ¡Haz click para romper la ventana y escapar!
   </div>
 
@@ -151,7 +178,6 @@
     }
   </script>
 
-  <!-- Three.js degradado -->
   <script>
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(-1,1,1,-1,0,1);
@@ -173,7 +199,6 @@
     });
   </script>
 
-  <!-- Grietas y cambio de texto al 7º click -->
   <script>
     const crackImages = [
       'https://ik.imagekit.io/k0qx6odcz/_Pngtree_glass%20crack%20broken%20glass%20mirror_6813123.png?updatedAt=1762964675210',
@@ -185,6 +210,8 @@
 
     const brokenOverlay = document.querySelector('.broken-overlay');
     const messageText = document.querySelector('.message-text');
+    const errorText = document.querySelector('.error-text');
+    const body = document.body;
 
     function createCrack(clickX, clickY) {
       if (!cracksEnabled) return;
@@ -192,17 +219,20 @@
       clickCount++;
 
       if (clickCount === 7) {
-        // Eliminar todas las grietas
         const cracks = document.querySelectorAll('.crack');
         cracks.forEach(c => c.remove());
 
-        // Mostrar PNG de cristales
         brokenOverlay.style.display = 'block';
-
-        // Cambiar el texto a mensaje de éxito
         messageText.textContent = '¡Felicidades, has conseguido escapar!';
 
-        // Desactivar más clicks de grietas
+        // Cambiar tipografía a verde y quitar alarma
+        errorText.classList.remove('alarm');
+        messageText.classList.remove('alarm');
+        body.classList.remove('alarm');
+
+        errorText.classList.add('success');
+        messageText.classList.add('success');
+
         cracksEnabled = false;
         return;
       }
@@ -210,17 +240,13 @@
       const img = document.createElement('img');
       img.src = crackImages[Math.floor(Math.random() * crackImages.length)];
       img.className = 'crack';
-
       img.style.left = `${clickX}px`;
       img.style.top = `${clickY}px`;
-
       const rotation = Math.random() * 360;
       img.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
-
       const scale = Math.random() * 0.7 + 1.3;
       img.style.width = `${250 * scale}px`;
       img.style.height = `${250 * scale}px`;
-
       document.body.appendChild(img);
     }
 
