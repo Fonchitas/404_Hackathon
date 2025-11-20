@@ -9,7 +9,7 @@
 ## Team Members
 | Alfonso | | @Fonchitas |
 | Laura | | @ |
-| Valeria | | @ |
+| Valeria | | @ValeMtzAlvarez |
 | María Ignacia | | @nashlancrew |
 | Robi | | @robi-fgn |
 
