@@ -199,60 +199,81 @@
     });
   </script>
 
-  <script>
-    const crackImages = [
-      'https://ik.imagekit.io/k0qx6odcz/_Pngtree_glass%20crack%20broken%20glass%20mirror_6813123.png?updatedAt=1762964675210',
-      'https://ik.imagekit.io/k0qx6odcz/_Pngtree_glass%20crack%20broken%20glass%20transparent_6813130.png?updatedAt=1762964675217'
-    ];
+ <script>
+  const crackImages = [
+    'https://ik.imagekit.io/k0qx6odcz/_Pngtree_glass%20crack%20broken%20glass%20mirror_6813123.png?updatedAt=1762964675210',
+    'https://ik.imagekit.io/k0qx6odcz/_Pngtree_glass%20crack%20broken%20glass%20transparent_6813130.png?updatedAt=1762964675217'
+  ];
 
-    let clickCount = 0;
-    let cracksEnabled = true;
+  let clickCount = 0;
+  let cracksEnabled = true;
 
-    const brokenOverlay = document.querySelector('.broken-overlay');
-    const messageText = document.querySelector('.message-text');
-    const errorText = document.querySelector('.error-text');
-    const body = document.body;
+  const brokenOverlay = document.querySelector('.broken-overlay');
+  const messageText = document.querySelector('.message-text');
+  const errorText = document.querySelector('.error-text');
+  const body = document.body;
 
-    function createCrack(clickX, clickY) {
-      if (!cracksEnabled) return;
+  // Mensajes dinámicos por cada click
+  const clickMessages = [
+    "¡Buen comienzo! Sigue haciendo click…",
+    "¡Eso es! Vas por buen camino…",
+    "¡Vamos, tú puedes! Dale otro click…",
+    "¡Casi casi, no te rindas!",
+    "¡Muy cerca! Un poco más…",
+    "¡Último esfuerzo! ¡Un click más!"
+  ];
 
-      clickCount++;
+  function createCrack(clickX, clickY) {
+    if (!cracksEnabled) return;
 
-      if (clickCount === 7) {
-        const cracks = document.querySelectorAll('.crack');
-        cracks.forEach(c => c.remove());
+    clickCount++;
 
-        brokenOverlay.style.display = 'block';
-        messageText.textContent = '¡Felicidades, has conseguido escapar!';
+    // Si es el 7º click → éxito
+    if (clickCount === 7) {
+      const cracks = document.querySelectorAll('.crack');
+      cracks.forEach(c => c.remove());
 
-        // Cambiar tipografía a verde y quitar alarma
-        errorText.classList.remove('alarm');
-        messageText.classList.remove('alarm');
-        body.classList.remove('alarm');
+      brokenOverlay.style.display = 'block';
+      messageText.textContent = '¡Felicidades, has conseguido escapar!';
 
-        errorText.classList.add('success');
-        messageText.classList.add('success');
+      // Quitar alarma
+      errorText.classList.remove('alarm');
+      messageText.classList.remove('alarm');
+      body.classList.remove('alarm');
 
-        cracksEnabled = false;
-        return;
-      }
+      // Verde de éxito
+      errorText.classList.add('success');
+      messageText.classList.add('success');
 
-      const img = document.createElement('img');
-      img.src = crackImages[Math.floor(Math.random() * crackImages.length)];
-      img.className = 'crack';
-      img.style.left = `${clickX}px`;
-      img.style.top = `${clickY}px`;
-      const rotation = Math.random() * 360;
-      img.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
-      const scale = Math.random() * 0.7 + 1.3;
-      img.style.width = `${250 * scale}px`;
-      img.style.height = `${250 * scale}px`;
-      document.body.appendChild(img);
+      cracksEnabled = false;
+      return;
     }
 
-    window.addEventListener('click', (e) => {
-      createCrack(e.clientX, e.clientY);
-    });
-  </script>
+    // Cambiar mensaje motivacional (1 a 6)
+    messageText.textContent = clickMessages[clickCount - 1];
+
+    // Crear grieta visual
+    const img = document.createElement('img');
+    img.src = crackImages[Math.floor(Math.random() * crackImages.length)];
+    img.className = 'crack';
+
+    img.style.left = `${clickX}px`;
+    img.style.top = `${clickY}px`;
+
+    const rotation = Math.random() * 360;
+    img.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+
+    const scale = Math.random() * 0.7 + 1.3;
+    img.style.width = `${250 * scale}px`;
+    img.style.height = `${250 * scale}px`;
+
+    document.body.appendChild(img);
+  }
+
+  window.addEventListener('click', (e) => {
+    createCrack(e.clientX, e.clientY);
+  });
+</script>
+
 </body>
 </html>
