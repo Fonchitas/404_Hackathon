@@ -8,9 +8,14 @@
 
 ## Team Members
 | Alfonso | | @Fonchitas |
-| Laura | | @ |
+
+| Laura | | @lauragonzalezfer1 |
+
 | Valeria | | @ValeMtzAlvarez |
+
 | María Ignacia | | @nashlancrew |
+
 | Robi | | @robi-fgn |
 
-
+## Solution
+We created a fun website where the user is put in the shoes of an astronaut whose spaceship is about to explode. In order to escape they need to click the window to break the glass, and it gradually breaks more and more untill they successfully escape.
