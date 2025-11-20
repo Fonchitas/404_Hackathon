@@ -3,8 +3,11 @@
 
 ## Goals & Objectives
 - Create an interesting and interactive Error 404 website
-- Find a main concept that can lead to the website's storytelling
+- Find a main concept that can lead to the website's storytelling and engage with the user 
 - Develop animations and interactivity
+
+Technologies Used 
+For this project we combined HTML, CSS for styling and JavaScript for animations and interactions.
 
 ## Team Members
 | Alfonso | | @Fonchitas |
