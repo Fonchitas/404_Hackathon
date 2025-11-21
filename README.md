@@ -6,7 +6,7 @@
 - Find a main concept that can lead to the website's storytelling and engage with the user 
 - Develop animations and interactivity
 
-Technologies Used 
+## Technologies Used 
 For this project we combined HTML, CSS for styling and JavaScript for animations and interactions.
 
 ## Team Members
