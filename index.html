@@ -1,279 +1,1299 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Error 404 - Marte con grietas y ventana</title>
-<style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    overflow: hidden;
-    background: black;
-    font-family: 'Poppins', sans-serif;
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Evacuación de Emergencia</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-  }
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Rajdhani', sans-serif;
+            cursor: crosshair;
+            background: #000;
+        }
 
-  .crack {
-    position: absolute;
-    pointer-events: none;
-    z-index: 6;
-    width: 250px;
-    height: 250px;
-    transform: translate(-50%, -50%) rotate(0deg);
-    opacity: 1;
-    user-select: none;
-  }
+        /* Interior de la nave - paredes metálicas oscuras */
+        #ship-interior {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            background: 
+                radial-gradient(ellipse at center, transparent 0%, transparent 30%, rgba(15,15,20,0.98) 60%, rgba(8,8,12,1) 100%),
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.02) 2px, rgba(255,255,255,0.02) 4px),
+                linear-gradient(180deg, #12121a 0%, #08080f 100%);
+        }
 
-  .broken-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 8;
-    pointer-events: none;
-    background: url('https://ik.imagekit.io/k0qx6odcz/cristales%20(1).png?updatedAt=1762966034594') center center no-repeat;
-    background-size: cover;
-    display: none;
-  }
+        /* Textura metálica de fondo */
+        #ship-interior::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(90deg, transparent, transparent 50px, rgba(255,255,255,0.01) 50px, rgba(255,255,255,0.01) 51px),
+                repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(255,255,255,0.01) 50px, rgba(255,255,255,0.01) 51px);
+            opacity: 0.3;
+        }
 
-  .window-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 10;
-    pointer-events: none;
-    background: url('https://ik.imagekit.io/k0qx6odcz/ventana%20espacial.png?updatedAt=1762964045170') center center no-repeat;
-    background-size: cover;
-  }
+        /* Alarma roja parpadeante */
+        #alarm-flash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+            animation: emergencyFlash 1s ease-in-out infinite;
+            mix-blend-mode: screen;
+        }
 
-  .error-text {
-    position: absolute;
-    top: 40%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: white;
-    font-size: 10vw;
-    font-weight: 900;
-    z-index: 15;
-    text-shadow: 0 0 60px rgba(255,255,255,0.6);
-    letter-spacing: 3px;
-    text-align: center;
-    transition: all 0.5s ease;
-  }
+        @keyframes emergencyFlash {
+            0%, 40%, 100% {
+                background: radial-gradient(circle at center, rgba(255, 0, 0, 0) 0%, rgba(255, 0, 0, 0) 100%);
+            }
+            20% {
+                background: radial-gradient(circle at center, rgba(255, 0, 0, 0.2) 0%, rgba(255, 0, 0, 0) 70%);
+            }
+        }
 
-  .message-text {
-    position: absolute;
-    top: 60%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: white;
-    font-size: 2vw;
-    font-weight: 900;
-    z-index: 15;
-    text-align: center;
-    text-shadow: 0 0 60px rgba(255,255,255,0.6);
-    transition: all 0.5s ease;
-  }
+        #alarm-flash.safe {
+            animation: none;
+            background: radial-gradient(circle at center, rgba(0, 200, 255, 0.12) 0%, rgba(0, 100, 200, 0) 70%);
+        }
 
-  /* Animaciones de alarma */
-  @keyframes alarmBlink {
-    0%, 50%, 100% { color: white; text-shadow: 0 0 60px rgba(255,255,255,0.6); }
-    25%, 75% { color: red; text-shadow: 0 0 80px rgba(255,0,0,1); }
-  }
+        /* Canvas de Marte */
+        #mars-canvas {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 52vmin;
+            height: 52vmin;
+            border-radius: 50%;
+            z-index: 3;
+            box-shadow: 
+                inset 0 0 80px rgba(0,0,0,0.9),
+                0 0 40px rgba(255,100,50,0.25);
+        }
 
-  @keyframes shake {
-    0% { transform: translate(-50%, -50%) rotate(0deg); }
-    25% { transform: translate(-48%, -52%) rotate(-1deg); }
-    50% { transform: translate(-50%, -50%) rotate(1deg); }
-    75% { transform: translate(-52%, -48%) rotate(-1deg); }
-    100% { transform: translate(-50%, -50%) rotate(0deg); }
-  }
+        /* Marco de ventana futurista principal */
+        #viewport-frame {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70vmin;
+            height: 70vmin;
+            z-index: 4;
+            pointer-events: none;
+        }
 
-  .error-text.alarm {
-    animation: alarmBlink 0.5s infinite, shake 0.3s infinite;
-  }
+        /* HUD overlay futurista */
+        #hud-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70vmin;
+            height: 70vmin;
+            z-index: 7;
+            pointer-events: none;
+            font-family: 'Share Tech Mono', monospace;
+            color: rgba(255, 80, 80, 0.8);
+            font-size: clamp(8px, 1.5vmin, 12px);
+        }
 
-  .message-text.alarm {
-    animation: alarmBlink 0.5s infinite, shake 0.3s infinite;
-  }
+        #hud-overlay.safe {
+            color: rgba(0, 255, 200, 0.8);
+        }
 
-  body.alarm::before {
-    content: '';
-    position: fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    background: rgba(255,0,0,0.2);
-    pointer-events:none;
-    animation: alarmBlink 0.5s infinite;
-    z-index:14;
-  }
+        .hud-corner {
+            position: absolute;
+            padding: clamp(5px, 1vmin, 10px);
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid currentColor;
+            border-radius: 3px;
+            animation: hudBlink 2s ease-in-out infinite;
+        }
 
-  /* Estilo de éxito */
-  .success {
-    color: #00ff00; /* verde brillante */
-    text-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00;
-  }
+        @keyframes hudBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
 
-</style>
+        .hud-corner.top-left {
+            top: 5%;
+            left: 5%;
+        }
+
+        .hud-corner.top-right {
+            top: 5%;
+            right: 5%;
+            text-align: right;
+        }
+
+        .hud-corner.bottom-left {
+            bottom: 5%;
+            left: 5%;
+        }
+
+        .hud-corner.bottom-right {
+            bottom: 5%;
+            right: 5%;
+            text-align: right;
+        }
+
+        /* Líneas de escaneo */
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, currentColor, transparent);
+            opacity: 0.3;
+            animation: scanMove 3s linear infinite;
+        }
+
+        @keyframes scanMove {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+
+        /* Cristal roto final */
+        #shattered-glass {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 52vmin;
+            height: 52vmin;
+            z-index: 5;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        #shattered-glass.visible {
+            opacity: 1;
+        }
+
+        /* Container de grietas */
+        #cracks-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 52vmin;
+            height: 52vmin;
+            z-index: 6;
+            pointer-events: none;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        .crack {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0;
+            animation: crackAppear 0.2s ease forwards;
+            filter: drop-shadow(0 0 5px rgba(255,255,255,0.9));
+        }
+
+        @keyframes crackAppear {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.3);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        /* Paneles de emergencia superiores */
+        #emergency-panels {
+            position: fixed;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 clamp(20px, 5vw, 60px);
+            pointer-events: none;
+        }
+
+        .status-panel {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid rgba(255, 50, 50, 0.9);
+            border-radius: 8px;
+            padding: clamp(10px, 2vw, 18px) clamp(15px, 3vw, 30px);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: clamp(11px, 2vw, 16px);
+            color: #ff3333;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            animation: panelPulse 1s ease-in-out infinite;
+            box-shadow: 
+                0 0 25px rgba(255, 50, 50, 0.4),
+                inset 0 0 25px rgba(255, 50, 50, 0.15);
+        }
+
+        @keyframes panelPulse {
+            0%, 100% {
+                border-color: rgba(255, 50, 50, 0.9);
+                color: #ff3333;
+            }
+            50% {
+                border-color: rgba(255, 100, 100, 1);
+                color: #ff6666;
+            }
+        }
+
+        .status-panel.safe {
+            border-color: rgba(0, 255, 200, 0.9);
+            color: #00ffcc;
+            animation: none;
+            box-shadow: 
+                0 0 25px rgba(0, 255, 200, 0.4),
+                inset 0 0 25px rgba(0, 255, 200, 0.15);
+        }
+
+        /* Contenedor de contenido */
+        #content {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            gap: clamp(15px, 4vh, 40px);
+        }
+
+        /* Texto 404 */
+        #error-404 {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(70px, 18vw, 200px);
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 
+                0 0 15px rgba(255, 255, 255, 0.9),
+                0 0 25px rgba(255, 50, 50, 0.8),
+                0 0 35px rgba(255, 0, 0, 0.6),
+                0 0 50px rgba(255, 0, 0, 0.5);
+            letter-spacing: 0.15em;
+            animation: glitchDanger 3s infinite;
+            margin-top: -12vh;
+        }
+
+        @keyframes glitchDanger {
+            0%, 90%, 100% {
+                text-shadow: 
+                    0 0 15px rgba(255, 255, 255, 0.9),
+                    0 0 25px rgba(255, 50, 50, 0.8),
+                    0 0 35px rgba(255, 0, 0, 0.6);
+                transform: translateX(0);
+            }
+            92% {
+                text-shadow: 
+                    -3px 0 15px rgba(255, 0, 0, 1),
+                    3px 0 15px rgba(0, 255, 255, 0.9);
+                transform: translateX(-3px);
+            }
+            94% {
+                text-shadow: 
+                    3px 0 15px rgba(255, 0, 0, 1),
+                    -3px 0 15px rgba(0, 255, 255, 0.9);
+                transform: translateX(3px);
+            }
+        }
+
+        #error-404.safe {
+            color: #00ffcc;
+            text-shadow: 
+                0 0 15px rgba(0, 255, 255, 1),
+                0 0 30px rgba(0, 200, 255, 0.7),
+                0 0 45px rgba(0, 150, 255, 0.5);
+            animation: glitchSafe 4s infinite;
+        }
+
+        @keyframes glitchSafe {
+            0%, 95%, 100% {
+                text-shadow: 
+                    0 0 15px rgba(0, 255, 255, 1),
+                    0 0 30px rgba(0, 200, 255, 0.7),
+                    0 0 45px rgba(0, 150, 255, 0.5);
+            }
+            97% {
+                text-shadow: 
+                    0 0 20px rgba(0, 255, 255, 1),
+                    0 0 40px rgba(0, 200, 255, 0.9);
+            }
+        }
+
+        /* Mensajes */
+        #message {
+            font-size: clamp(15px, 3.2vw, 24px);
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.95);
+            text-align: center;
+            max-width: 90%;
+            padding: clamp(14px, 2.8vw, 28px) clamp(22px, 4.5vw, 50px);
+            background: rgba(20, 0, 0, 0.85);
+            border: 2px solid rgba(255, 80, 80, 0.8);
+            border-radius: 12px;
+            backdrop-filter: blur(12px);
+            box-shadow: 
+                0 0 35px rgba(255, 50, 50, 0.5),
+                inset 0 0 35px rgba(255, 50, 50, 0.2);
+            animation: urgentPulse 1.5s ease-in-out infinite;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        @keyframes urgentPulse {
+            0%, 100% {
+                box-shadow: 
+                    0 0 35px rgba(255, 50, 50, 0.5),
+                    inset 0 0 35px rgba(255, 50, 50, 0.2);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 
+                    0 0 55px rgba(255, 50, 50, 0.7),
+                    inset 0 0 55px rgba(255, 50, 50, 0.3);
+                transform: scale(1.02);
+            }
+        }
+
+        #message.safe {
+            border-color: rgba(0, 255, 200, 0.9);
+            background: rgba(0, 40, 40, 0.85);
+            box-shadow: 
+                0 0 45px rgba(0, 255, 200, 0.6),
+                inset 0 0 45px rgba(0, 255, 200, 0.25);
+            animation: successGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes successGlow {
+            0%, 100% {
+                box-shadow: 
+                    0 0 45px rgba(0, 255, 200, 0.6),
+                    inset 0 0 45px rgba(0, 255, 200, 0.25);
+            }
+            50% {
+                box-shadow: 
+                    0 0 65px rgba(0, 255, 200, 0.8),
+                    inset 0 0 65px rgba(0, 255, 200, 0.35);
+            }
+        }
+
+        /* Contador de integridad */
+        #integrity-counter {
+            position: fixed;
+            bottom: clamp(25px, 6vh, 70px);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(18px, 4.5vw, 36px);
+            font-weight: 700;
+            color: #ff3333;
+            background: rgba(0, 0, 0, 0.85);
+            padding: clamp(12px, 2.5vw, 24px) clamp(24px, 5vw, 48px);
+            border: 3px solid rgba(255, 50, 50, 0.9);
+            border-radius: 12px;
+            pointer-events: none;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            box-shadow: 
+                0 0 35px rgba(255, 50, 50, 0.6),
+                inset 0 0 25px rgba(255, 50, 50, 0.25);
+        }
+
+        #integrity-counter.safe {
+            display: none;
+        }
+
+        /* Capa de interacción */
+        #click-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 8;
+            cursor: crosshair;
+        }
+
+        /* Botón de inicio de audio */
+        #audio-start-button {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+            padding: 20px 40px;
+            font-family: 'Orbitron', monospace;
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            background: rgba(255, 50, 50, 0.9);
+            border: 3px solid rgba(255, 100, 100, 1);
+            border-radius: 10px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            box-shadow: 
+                0 0 40px rgba(255, 50, 50, 0.7),
+                inset 0 0 20px rgba(255, 100, 100, 0.3);
+            animation: buttonPulse 1.5s ease-in-out infinite;
+            transition: all 0.3s ease;
+        }
+
+        #audio-start-button:hover {
+            background: rgba(255, 80, 80, 1);
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+
+        @keyframes buttonPulse {
+            0%, 100% {
+                box-shadow: 
+                    0 0 40px rgba(255, 50, 50, 0.7),
+                    inset 0 0 20px rgba(255, 100, 100, 0.3);
+            }
+            50% {
+                box-shadow: 
+                    0 0 60px rgba(255, 50, 50, 1),
+                    inset 0 0 30px rgba(255, 100, 100, 0.5);
+            }
+        }
+
+        /* Partículas de escape */
+        .escape-particle {
+            position: fixed;
+            width: 5px;
+            height: 5px;
+            background: rgba(0, 255, 200, 0.9);
+            border-radius: 50%;
+            z-index: 15;
+            pointer-events: none;
+            box-shadow: 0 0 12px rgba(0, 255, 200, 0.9);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            #error-404 {
+                font-size: clamp(55px, 14vw, 110px);
+            }
+            
+            .status-panel {
+                font-size: clamp(9px, 2.8vw, 13px);
+                padding: clamp(8px, 1.8vw, 12px) clamp(12px, 2.8vw, 18px);
+            }
+        }
+    </style>
 </head>
-<body class="alarm">
-  <canvas id="gradient"></canvas>
-  <div class="window-overlay"></div>
-  <div class="broken-overlay"></div>
-  <div class="error-text alarm">404</div>
-  <div class="message-text alarm">
-    ¡Tu nave se ha estrellado!, ¡Haz click para romper la ventana y escapar!
-  </div>
+<body>
+    <!-- Interior de la nave -->
+    <div id="ship-interior"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+    <!-- Alarma de emergencia -->
+    <div id="alarm-flash"></div>
 
-  <!-- Shaders -->
-  <script id="vertexShader" type="x-shader/x-vertex">
-    varying vec2 vUv;
-    uniform float uTime;
-    void main() {
-      vUv = uv;
-      vec3 pos = position;
-      pos.x += sin(pos.y * 4.0 + uTime * 0.3) * 0.1;
-      pos.y += cos(pos.x * 3.0 + uTime * 0.4) * 0.1;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
-    }
-  </script>
+    <!-- Canvas de Marte -->
+    <canvas id="mars-canvas"></canvas>
 
-  <script id="fragmentShader" type="x-shader/x-fragment">
-    varying vec2 vUv;
-    uniform float uTime;
-    float random(vec2 p) { return fract(sin(dot(p, vec2(12.9898,78.233))) * 43758.5453);}
-    float noise(vec2 p){vec2 i=floor(p);vec2 f=fract(p);float a=random(i);float b=random(i+vec2(1.0,0.0));float c=random(i+vec2(0.0,1.0));float d=random(i+vec2(1.0,1.0));vec2 u=f*f*(3.0-2.0*f);return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;}
-    void main(){
-      vec2 uv=vUv*2.0-1.0;
-      float t=uTime*0.25;
-      float len=length(uv);
-      float wave=sin(len*6.0-t*2.0)*0.4+0.6;
-      vec3 c1=vec3(1.0,0.3,0.1);
-      vec3 c2=vec3(1.0,0.5,0.1);
-      vec3 c3=vec3(0.8,0.35,0.1);
-      vec3 c4=vec3(0.0,0.0,0.0);
-      vec3 base=mix(c1,c2,wave);
-      base=mix(base,c3,sin(uv.x*3.0+t)*0.5+0.5);
-      base=mix(base,c4,0.2);
-      float grain=random(uv*10.0+t*10.0)*0.15;
-      grain+=noise(uv*5.0+t)*0.1;
-      base+=grain;
-      base=pow(base,vec3(1.2));
-      gl_FragColor=vec4(base,1.0);
-    }
-  </script>
+    <!-- Marco futurista de la ventana -->
+    <svg id="viewport-frame" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet">
+        <defs>
+            <radialGradient id="frameGradient">
+                <stop offset="0%" style="stop-color:#666;stop-opacity:1" />
+                <stop offset="50%" style="stop-color:#444;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#222;stop-opacity:1" />
+            </radialGradient>
+            <linearGradient id="techGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#555;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#222;stop-opacity:1" />
+            </linearGradient>
+            <filter id="metallic">
+                <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+                <feOffset dx="0" dy="3" result="offsetblur"/>
+                <feComponentTransfer>
+                    <feFuncA type="linear" slope="0.6"/>
+                </feComponentTransfer>
+                <feMerge>
+                    <feMergeNode/>
+                    <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+            </filter>
+            <filter id="glow">
+                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                <feMerge>
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+            </filter>
+        </defs>
+        
+        <!-- Marco metálico exterior grueso multicapa -->
+        <circle cx="500" cy="500" r="485" fill="url(#frameGradient)" filter="url(#metallic)"/>
+        <circle cx="500" cy="500" r="475" fill="none" stroke="#555" stroke-width="3"/>
+        <circle cx="500" cy="500" r="470" fill="url(#techGradient)"/>
+        <circle cx="500" cy="500" r="460" fill="none" stroke="#666" stroke-width="10"/>
+        <circle cx="500" cy="500" r="455" fill="none" stroke="#444" stroke-width="6"/>
+        
+        <!-- Panel técnico exterior -->
+        <g opacity="0.9">
+            <!-- Segmentos del anillo -->
+            <path d="M 500,40 L 520,60 L 480,60 Z" fill="#555" stroke="#777" stroke-width="1"/>
+            <path d="M 500,960 L 520,940 L 480,940 Z" fill="#555" stroke="#777" stroke-width="1"/>
+            <path d="M 40,500 L 60,520 L 60,480 Z" fill="#555" stroke="#777" stroke-width="1"/>
+            <path d="M 960,500 L 940,520 L 940,480 Z" fill="#555" stroke="#777" stroke-width="1"/>
+        </g>
+        
+        <!-- Tornillos grandes del marco (8 posiciones) -->
+        <g opacity="0.95">
+            <circle cx="500" cy="50" r="18" fill="#4a4a4a" stroke="#666" stroke-width="2"/>
+            <circle cx="500" cy="50" r="12" fill="#333" stroke="#555" stroke-width="1"/>
+            <circle cx="500" cy="50" r="6" fill="#222"/>
+            <line x1="494" y1="50" x2="506" y2="50" stroke="#111" stroke-width="1.5"/>
+            
+            <circle cx="850" cy="150" r="18" fill="#4a4a4a" stroke="#666" stroke-width="2"/>
+            <circle cx="850" cy="150" r="12" fill="#333" stroke="#555" stroke-width="1"/>
+            <circle cx="850" cy="150" r="6" fill="#222"/>
+            <line x1="844" y1="150" x2="856" y2="150" stroke="#111" stroke-width="1.5"/>
+            
+            <circle cx="950" cy="500" r="18" fill="#4a4a4a" stroke="#666" stroke-width="2"/>
+            <circle cx="950" cy="500" r="12" fill="#333" stroke="#555" stroke-width="1"/>
+            <circle cx="950" cy="500" r="6" fill="#222"/>
+            <line x1="944" y1="500" x2="956" y2="500" stroke="#111" stroke-width="1.5"/>
+            
+            <circle cx="850" cy="850" r="18" fill="#4a4a4a" stroke="#666" stroke-width="2"/>
+            <circle cx="850" cy="850" r="12" fill="#333" stroke="#555" stroke-width="1"/>
+            <circle cx="850" cy="850" r="6" fill="#222"/>
+            <line x1="844" y1="850" x2="856" y2="850" stroke="#111" stroke-width="1.5"/>
+            
+            <circle cx="500" cy="950" r="18" fill="#4a4a4a" stroke="#666" stroke-width="2"/>
+            <circle cx="500" cy="950" r="12" fill="#333" stroke="#555" stroke-width="1"/>
+            <circle cx="500" cy="950" r="6" fill="#222"/>
+            <line x1="494" y1="950" x2="506" y2="950" stroke="#111" stroke-width="1.5"/>
+            
+            <circle cx="150" cy="850" r="18" fill="#4a4a4a" stroke="#666" stroke-width="2"/>
+            <circle cx="150" cy="850" r="12" fill="#333" stroke="#555" stroke-width="1"/>
+            <circle cx="150" cy="850" r="6" fill="#222"/>
+            <line x1="144" y1="850" x2="156" y2="850" stroke="#111" stroke-width="1.5"/>
+            
+            <circle cx="50" cy="500" r="18" fill="#4a4a4a" stroke="#666" stroke-width="2"/>
+            <circle cx="50" cy="500" r="12" fill="#333" stroke="#555" stroke-width="1"/>
+            <circle cx="50" cy="500" r="6" fill="#222"/>
+            <line x1="44" y1="500" x2="56" y2="500" stroke="#111" stroke-width="1.5"/>
+            
+            <circle cx="150" cy="150" r="18" fill="#4a4a4a" stroke="#666" stroke-width="2"/>
+            <circle cx="150" cy="150" r="12" fill="#333" stroke="#555" stroke-width="1"/>
+            <circle cx="150" cy="150" r="6" fill="#222"/>
+            <line x1="144" y1="150" x2="156" y2="150" stroke="#111" stroke-width="1.5"/>
+        </g>
+        
+        <!-- Detalles técnicos y paneles -->
+        <g opacity="0.8">
+            <!-- Panel superior -->
+            <rect x="450" y="80" width="100" height="30" fill="rgba(50,50,60,0.8)" stroke="#666" stroke-width="1" rx="3"/>
+            <text x="500" y="100" font-family="Share Tech Mono" font-size="10" fill="#ff5555" text-anchor="middle">VP-A7</text>
+            
+            <!-- Panel derecho -->
+            <rect x="870" y="475" width="50" height="50" fill="rgba(50,50,60,0.8)" stroke="#666" stroke-width="1" rx="3"/>
+            <circle cx="895" cy="500" r="12" fill="none" stroke="#ff5555" stroke-width="2" opacity="0.6"/>
+            
+            <!-- Panel inferior -->
+            <rect x="420" y="890" width="160" height="25" fill="rgba(50,50,60,0.8)" stroke="#666" stroke-width="1" rx="3"/>
+            <text x="500" y="907" font-family="Share Tech Mono" font-size="9" fill="#999" text-anchor="middle">VIEWPORT INTEGRITY</text>
+            
+            <!-- Panel izquierdo -->
+            <rect x="80" y="475" width="50" height="50" fill="rgba(50,50,60,0.8)" stroke="#666" stroke-width="1" rx="3"/>
+            <rect x="90" y="485" width="30" height="5" fill="#ff5555" opacity="0.4"/>
+            <rect x="90" y="495" width="30" height="5" fill="#ff5555" opacity="0.4"/>
+            <rect x="90" y="505" width="30" height="5" fill="#ff5555" opacity="0.4"/>
+        </g>
+        
+        <!-- Luces de estado (LEDs) -->
+        <g filter="url(#glow)">
+            <circle cx="500" cy="65" r="4" fill="#ff3333" opacity="0.9">
+                <animate attributeName="opacity" values="0.9;0.3;0.9" dur="1s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="935" cy="500" r="4" fill="#ff3333" opacity="0.9">
+                <animate attributeName="opacity" values="0.3;0.9;0.3" dur="1s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="500" cy="935" r="4" fill="#ff3333" opacity="0.9">
+                <animate attributeName="opacity" values="0.9;0.3;0.9" dur="1s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="65" cy="500" r="4" fill="#ff3333" opacity="0.9">
+                <animate attributeName="opacity" values="0.3;0.9;0.3" dur="1s" repeatCount="indefinite"/>
+            </circle>
+        </g>
+        
+        <!-- Reflejos realistas del cristal -->
+        <g opacity="0.15">
+            <ellipse cx="300" cy="300" rx="80" ry="140" fill="white" transform="rotate(-25 300 300)"/>
+            <ellipse cx="700" cy="400" rx="60" ry="100" fill="white" transform="rotate(20 700 400)"/>
+        </g>
+        
+        <!-- Líneas de separación internas -->
+        <line x1="500" y1="100" x2="500" y2="450" stroke="#444" stroke-width="1.5" opacity="0.4"/>
+        <line x1="500" y1="550" x2="500" y2="900" stroke="#444" stroke-width="1.5" opacity="0.4"/>
+        <line x1="100" y1="500" x2="450" y2="500" stroke="#444" stroke-width="1.5" opacity="0.4"/>
+        <line x1="550" y1="500" x2="900" y2="500" stroke="#444" stroke-width="1.5" opacity="0.4"/>
+    </svg>
 
-  <script>
-    const scene = new THREE.Scene();
-    const camera = new THREE.OrthographicCamera(-1,1,1,-1,0,1);
-    const renderer = new THREE.WebGLRenderer({canvas:document.getElementById('gradient')});
-    renderer.setSize(window.innerWidth,window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    const geometry=new THREE.PlaneGeometry(2,2);
-    const material=new THREE.ShaderMaterial({
-      uniforms:{uTime:{value:0}},
-      vertexShader:document.getElementById('vertexShader').textContent,
-      fragmentShader:document.getElementById('fragmentShader').textContent
-    });
-    const mesh=new THREE.Mesh(geometry,material);
-    scene.add(mesh);
-    function animate(time){material.uniforms.uTime.value=time*0.001;renderer.render(scene,camera);requestAnimationFrame(animate);}
-    animate();
-    window.addEventListener('resize',()=>{
-      renderer.setSize(window.innerWidth,window.innerHeight);
-    });
-  </script>
+    <!-- HUD Overlay futurista -->
+    <div id="hud-overlay">
+        <div class="hud-corner top-left">
+            VIEWPORT A-7<br>
+            STATUS: CRITICAL
+        </div>
+        <div class="hud-corner top-right">
+            PRESSURE: 0.12 BAR<br>
+            TEMP: -63°C
+        </div>
+        <div class="hud-corner bottom-left">
+            MARS SURFACE<br>
+            ALT: 0m
+        </div>
+        <div class="hud-corner bottom-right">
+            HULL BREACH<br>
+            EVAC: ACTIVE
+        </div>
+        <div class="scan-line"></div>
+    </div>
 
- <script>
-  const crackImages = [
-    'https://ik.imagekit.io/k0qx6odcz/_Pngtree_glass%20crack%20broken%20glass%20mirror_6813123.png?updatedAt=1762964675210',
-    'https://ik.imagekit.io/k0qx6odcz/_Pngtree_glass%20crack%20broken%20glass%20transparent_6813130.png?updatedAt=1762964675217'
-  ];
+    <!-- Cristal roto -->
+    <svg id="shattered-glass" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet">
+        <defs>
+            <filter id="glass-crack-filter">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="1"/>
+                <feColorMatrix type="saturate" values="1.5"/>
+            </filter>
+        </defs>
+        <g opacity="0.95" filter="url(#glass-crack-filter)">
+            <circle cx="500" cy="500" r="35" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.7)" stroke-width="4"/>
+            
+            <line x1="500" y1="500" x2="850" y2="180" stroke="rgba(255,255,255,0.8)" stroke-width="5"/>
+            <line x1="500" y1="500" x2="950" y2="500" stroke="rgba(255,255,255,0.8)" stroke-width="5"/>
+            <line x1="500" y1="500" x2="850" y2="820" stroke="rgba(255,255,255,0.8)" stroke-width="5"/>
+            <line x1="500" y1="500" x2="500" y2="920" stroke="rgba(255,255,255,0.8)" stroke-width="5"/>
+            <line x1="500" y1="500" x2="150" y2="820" stroke="rgba(255,255,255,0.8)" stroke-width="5"/>
+            <line x1="500" y1="500" x2="50" y2="500" stroke="rgba(255,255,255,0.8)" stroke-width="5"/>
+            <line x1="500" y1="500" x2="150" y2="180" stroke="rgba(255,255,255,0.8)" stroke-width="5"/>
+            <line x1="500" y1="500" x2="500" y2="80" stroke="rgba(255,255,255,0.8)" stroke-width="5"/>
+            
+            <path d="M500,500 L850,180 L920,280 L680,580 Z" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.6)" stroke-width="3"/>
+            <path d="M500,500 L950,500 L900,700 L620,640 Z" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.6)" stroke-width="3"/>
+            <path d="M500,500 L850,820 L640,900 L480,700 Z" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.6)" stroke-width="3"/>
+            <path d="M500,500 L500,920 L320,880 L420,640 Z" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.6)" stroke-width="3"/>
+            <path d="M500,500 L150,820 L100,700 L320,580 Z" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.6)" stroke-width="3"/>
+            <path d="M500,500 L50,500 L100,300 L380,360 Z" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.6)" stroke-width="3"/>
+            <path d="M500,500 L150,180 L320,120 L580,320 Z" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.6)" stroke-width="3"/>
+            <path d="M500,500 L500,80 L700,100 L640,360 Z" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.6)" stroke-width="3"/>
+        </g>
+    </svg>
 
-  let clickCount = 0;
-  let cracksEnabled = true;
+    <!-- Container de grietas -->
+    <div id="cracks-container"></div>
 
-  const brokenOverlay = document.querySelector('.broken-overlay');
-  const messageText = document.querySelector('.message-text');
-  const errorText = document.querySelector('.error-text');
-  const body = document.body;
+    <!-- Paneles de emergencia -->
+    <div id="emergency-panels">
+        <div class="status-panel" id="left-panel">
+            ⚠ HULL BREACH<br>
+            <span style="font-size: 0.75em; opacity: 0.85;">ZONE: VIEWPORT A-7</span>
+        </div>
+        <div class="status-panel" id="right-panel">
+            ⚠ EVACUATION<br>
+            <span style="font-size: 0.75em; opacity: 0.85;">STATUS: CRITICAL</span>
+        </div>
+    </div>
 
-  // Mensajes dinámicos por cada click
-  const clickMessages = [
-    "¡Buen comienzo! Sigue haciendo click…",
-    "¡Eso es! Vas por buen camino…",
-    "¡Vamos, tú puedes! Dale otro click…",
-    "¡Casi casi, no te rindas!",
-    "¡Muy cerca! Un poco más…",
-    "¡Último esfuerzo! ¡Un click más!"
-  ];
+    <!-- Contenido principal -->
+    <div id="content">
+        <div id="error-404">404</div>
+        <div id="message">⚠ VENTANA COMPROMETIDA - HAZ CLICK PARA ROMPERLA Y ESCAPAR</div>
+    </div>
 
-  function createCrack(clickX, clickY) {
-    if (!cracksEnabled) return;
+    <!-- Contador de integridad -->
+    <div id="integrity-counter">
+        INTEGRIDAD: <span id="integrity-value">100</span>%
+    </div>
 
-    clickCount++;
+    <!-- Botón de inicio de audio -->
+    <button id="audio-start-button">▶ INICIAR EVACUACIÓN</button>
 
-    // Si es el 7º click → éxito
-    if (clickCount === 7) {
-      const cracks = document.querySelectorAll('.crack');
-      cracks.forEach(c => c.remove());
+    <!-- Capa de interacción -->
+    <div id="click-layer"></div>
 
-      brokenOverlay.style.display = 'block';
-      messageText.textContent = '¡Felicidades, has conseguido escapar!';
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-      // Quitar alarma
-      errorText.classList.remove('alarm');
-      messageText.classList.remove('alarm');
-      body.classList.remove('alarm');
+    <script>
+        // ============================================
+        // CONFIGURACIÓN INICIAL
+        // ============================================
+        let clickCount = 0;
+        const maxClicks = 7;
+        let audioContext;
+        let isMusicPlaying = false;
+        let musicInterval;
+        
+        const messageEl = document.getElementById('message');
+        const clickLayer = document.getElementById('click-layer');
+        const cracksContainer = document.getElementById('cracks-container');
+        const shatteredGlass = document.getElementById('shattered-glass');
+        const alarmFlash = document.getElementById('alarm-flash');
+        const error404 = document.getElementById('error-404');
+        const integrityCounter = document.getElementById('integrity-counter');
+        const integrityValue = document.getElementById('integrity-value');
+        const leftPanel = document.getElementById('left-panel');
+        const rightPanel = document.getElementById('right-panel');
+        const hudOverlay = document.getElementById('hud-overlay');
+        const audioStartButton = document.getElementById('audio-start-button');
 
-      // Verde de éxito
-      errorText.classList.add('success');
-      messageText.classList.add('success');
+        // ============================================
+        // THREE.JS - MARTE DESDE LA VENTANA
+        // ============================================
+        const canvas = document.getElementById('mars-canvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+        const renderer = new THREE.WebGLRenderer({ 
+            canvas: canvas, 
+            antialias: true 
+        });
+        
+        const size = Math.min(window.innerWidth, window.innerHeight) * 0.52;
+        renderer.setSize(size, size);
+        renderer.setPixelRatio(window.devicePixelRatio);
 
-      cracksEnabled = false;
-      return;
-    }
+        const vertexShader = `
+            varying vec2 vUv;
+            void main() {
+                vUv = uv;
+                gl_Position = vec4(position, 1.0);
+            }
+        `;
 
-    // Cambiar mensaje motivacional (1 a 6)
-    messageText.textContent = clickMessages[clickCount - 1];
+        const fragmentShader = `
+            uniform float time;
+            uniform vec2 resolution;
+            varying vec2 vUv;
 
-    // Crear grieta visual
-    const img = document.createElement('img');
-    img.src = crackImages[Math.floor(Math.random() * crackImages.length)];
-    img.className = 'crack';
+            float random(vec2 st) {
+                return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+            }
 
-    img.style.left = `${clickX}px`;
-    img.style.top = `${clickY}px`;
+            float noise(vec2 st) {
+                vec2 i = floor(st);
+                vec2 f = fract(st);
+                float a = random(i);
+                float b = random(i + vec2(1.0, 0.0));
+                float c = random(i + vec2(0.0, 1.0));
+                float d = random(i + vec2(1.0, 1.0));
+                vec2 u = f * f * (3.0 - 2.0 * f);
+                return mix(a, b, u.x) + (c - a)* u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+            }
 
-    const rotation = Math.random() * 360;
-    img.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+            float fbm(vec2 st) {
+                float value = 0.0;
+                float amplitude = 0.5;
+                for (int i = 0; i < 8; i++) {
+                    value += amplitude * noise(st);
+                    st *= 2.15;
+                    amplitude *= 0.47;
+                }
+                return value;
+            }
 
-    const scale = Math.random() * 0.7 + 1.3;
-    img.style.width = `${250 * scale}px`;
-    img.style.height = `${250 * scale}px`;
+            void main() {
+                vec2 st = vUv;
+                vec2 center = vec2(0.5, 0.5);
+                float dist = distance(st, center);
+                
+                if (dist > 0.5) {
+                    discard;
+                }
+                
+                vec2 movement = vec2(time * 0.018, time * 0.012);
+                
+                float n1 = fbm(st * 4.5 + movement);
+                float n2 = fbm(st * 7.5 - movement * 0.65);
+                float n3 = fbm(st * 11.0 + movement * 0.45);
+                
+                float storm = (n1 * 0.5 + n2 * 0.3 + n3 * 0.2);
+                
+                float swirl = sin(st.x * 9.0 + time * 1.8 + n1 * 3.5) * 0.035;
+                storm += swirl;
+                
+                vec3 color1 = vec3(1.1, 0.4, 0.18);
+                vec3 color2 = vec3(0.95, 0.18, 0.06);
+                vec3 color3 = vec3(0.35, 0.1, 0.03);
+                vec3 color4 = vec3(1.3, 0.65, 0.35);
+                
+                vec3 color = mix(color3, color2, storm);
+                color = mix(color, color1, smoothstep(0.38, 0.68, storm));
+                color = mix(color, color4, smoothstep(0.72, 0.92, storm));
+                
+                color += vec3(1.1, 0.55, 0.25) * smoothstep(0.78, 1.0, storm) * 0.45;
+                
+                float edge = smoothstep(0.5, 0.43, dist);
+                color *= edge;
+                
+                float vignette = smoothstep(0.5, 0.18, dist);
+                color *= (0.55 + vignette * 0.45);
+                
+                gl_FragColor = vec4(color, 1.0);
+            }
+        `;
 
-    document.body.appendChild(img);
-  }
+        const shaderMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                time: { value: 0 },
+                resolution: { value: new THREE.Vector2(size, size) }
+            },
+            vertexShader: vertexShader,
+            fragmentShader: fragmentShader
+        });
 
-  window.addEventListener('click', (e) => {
-    createCrack(e.clientX, e.clientY);
-  });
-</script>
+        const geometry = new THREE.PlaneGeometry(2, 2);
+        const mesh = new THREE.Mesh(geometry, shaderMaterial);
+        scene.add(mesh);
 
+        function animate() {
+            requestAnimationFrame(animate);
+            shaderMaterial.uniforms.time.value += 0.01;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // ============================================
+        // MÚSICA DE FONDO - MEJORADA Y MÁS AUDIBLE
+        // ============================================
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return audioContext.resume();
+        }
+
+        function playEmergencyMusic() {
+            if (!audioContext || audioContext.state === 'suspended') return;
+
+            const now = audioContext.currentTime;
+            
+            // Bajo profundo y amenazante
+            const bass = audioContext.createOscillator();
+            const bassGain = audioContext.createGain();
+            bass.type = 'sine';
+            bass.frequency.setValueAtTime(55, now); // A1
+            bassGain.gain.setValueAtTime(0, now);
+            bassGain.gain.linearRampToValueAtTime(0.15, now + 0.1);
+            bassGain.gain.setValueAtTime(0.15, now + 1.8);
+            bassGain.gain.linearRampToValueAtTime(0, now + 2.2);
+            bass.connect(bassGain);
+            bassGain.connect(audioContext.destination);
+            bass.start(now);
+            bass.stop(now + 2.2);
+
+            // Tono medio inquietante
+            const mid = audioContext.createOscillator();
+            const midGain = audioContext.createGain();
+            mid.type = 'triangle';
+            mid.frequency.setValueAtTime(110, now + 0.3); // A2
+            midGain.gain.setValueAtTime(0, now + 0.3);
+            midGain.gain.linearRampToValueAtTime(0.08, now + 0.5);
+            midGain.gain.setValueAtTime(0.08, now + 1.8);
+            midGain.gain.linearRampToValueAtTime(0, now + 2.2);
+            mid.connect(midGain);
+            midGain.connect(audioContext.destination);
+            mid.start(now + 0.3);
+            mid.stop(now + 2.2);
+
+            // Nota alta tensa
+            const high = audioContext.createOscillator();
+            const highGain = audioContext.createGain();
+            high.type = 'sine';
+            high.frequency.setValueAtTime(220, now + 0.6); // A3
+            highGain.gain.setValueAtTime(0, now + 0.6);
+            highGain.gain.linearRampToValueAtTime(0.06, now + 0.8);
+            highGain.gain.setValueAtTime(0.06, now + 1.5);
+            highGain.gain.linearRampToValueAtTime(0, now + 2);
+            high.connect(highGain);
+            highGain.connect(audioContext.destination);
+            high.start(now + 0.6);
+            high.stop(now + 2);
+
+            // Ruido de fondo (ambiente espacial)
+            const noiseNode = audioContext.createBufferSource();
+            const bufferSize = audioContext.sampleRate * 2.5;
+            const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+            const output = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                output[i] = (Math.random() * 2 - 1) * 0.02;
+            }
+            noiseNode.buffer = buffer;
+            const noiseGain = audioContext.createGain();
+            const noiseFilter = audioContext.createBiquadFilter();
+            noiseFilter.type = 'lowpass';
+            noiseFilter.frequency.setValueAtTime(300, now);
+            noiseGain.gain.setValueAtTime(0.1, now);
+            noiseNode.connect(noiseFilter);
+            noiseFilter.connect(noiseGain);
+            noiseGain.connect(audioContext.destination);
+            noiseNode.start(now);
+        }
+
+        function startMusicLoop() {
+            if (isMusicPlaying) return;
+            isMusicPlaying = true;
+            
+            function loop() {
+                if (clickCount < maxClicks && isMusicPlaying) {
+                    playEmergencyMusic();
+                    musicInterval = setTimeout(loop, 2500);
+                }
+            }
+            loop();
+        }
+
+        function stopEmergencyMusic() {
+            isMusicPlaying = false;
+            if (musicInterval) {
+                clearTimeout(musicInterval);
+            }
+        }
+
+        function playSafeMusic() {
+            if (!audioContext || audioContext.state === 'suspended') return;
+
+            const now = audioContext.currentTime;
+            
+            const safeNotes = [
+                { freq: 261.63, delay: 0, duration: 1.5 },    // C4
+                { freq: 329.63, delay: 0.5, duration: 1.5 },  // E4
+                { freq: 392.00, delay: 1.0, duration: 1.5 },  // G4
+                { freq: 523.25, delay: 1.5, duration: 2.0 },  // C5
+            ];
+
+            safeNotes.forEach(note => {
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(note.freq, now + note.delay);
+                
+                gain.gain.setValueAtTime(0, now + note.delay);
+                gain.gain.linearRampToValueAtTime(0.12, now + note.delay + 0.3);
+                gain.gain.setValueAtTime(0.12, now + note.delay + note.duration - 0.5);
+                gain.gain.linearRampToValueAtTime(0, now + note.delay + note.duration);
+                
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+                
+                osc.start(now + note.delay);
+                osc.stop(now + note.delay + note.duration);
+            });
+
+            setTimeout(() => {
+                if (clickCount >= maxClicks) {
+                    playSafeMusic();
+                }
+            }, 3500);
+        }
+
+        // ============================================
+        // SONIDOS DE GRIETAS
+        // ============================================
+        function playCrackSound() {
+            if (!audioContext || audioContext.state === 'suspended') return;
+
+            const now = audioContext.currentTime;
+
+            // Sonido de grieta más realista
+            const osc1 = audioContext.createOscillator();
+            const osc2 = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            const noiseNode = audioContext.createBufferSource();
+            
+            // Ruido para textura
+            const bufferSize = audioContext.sampleRate * 0.15;
+            const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+            const output = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                output[i] = Math.random() * 2 - 1;
+            }
+            noiseNode.buffer = buffer;
+            
+            const noiseGain = audioContext.createGain();
+            const filter = audioContext.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(2000, now);
+            filter.Q.setValueAtTime(1, now);
+            
+            noiseGain.gain.setValueAtTime(0.4, now);
+            noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+            
+            noiseNode.connect(filter);
+            filter.connect(noiseGain);
+            noiseGain.connect(audioContext.destination);
+            
+            // Osciladores para tono
+            osc1.frequency.setValueAtTime(1200, now);
+            osc1.frequency.exponentialRampToValueAtTime(300, now + 0.12);
+            osc2.frequency.setValueAtTime(1800, now);
+            osc2.frequency.exponentialRampToValueAtTime(200, now + 0.12);
+            
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+            
+            osc1.connect(gain);
+            osc2.connect(gain);
+            gain.connect(audioContext.destination);
+            
+            osc1.start(now);
+            osc2.start(now);
+            noiseNode.start(now);
+            
+            osc1.stop(now + 0.12);
+            osc2.stop(now + 0.12);
+            noiseNode.stop(now + 0.15);
+        }
+
+        function playShatterSound() {
+            if (!audioContext || audioContext.state === 'suspended') return;
+
+            const now = audioContext.currentTime;
+
+            // Sonido dramático de rotura completa
+            for (let i = 0; i < 8; i++) {
+                const delay = i * 0.04;
+                
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                const noiseNode = audioContext.createBufferSource();
+                
+                const bufferSize = audioContext.sampleRate * 0.3;
+                const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+                const output = buffer.getChannelData(0);
+                for (let j = 0; j < bufferSize; j++) {
+                    output[j] = Math.random() * 2 - 1;
+                }
+                noiseNode.buffer = buffer;
+                
+                const noiseGain = audioContext.createGain();
+                noiseGain.gain.setValueAtTime(0.5, now + delay);
+                noiseGain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.3);
+                
+                noiseNode.connect(noiseGain);
+                noiseGain.connect(audioContext.destination);
+                
+                osc.frequency.setValueAtTime(1500 - i * 150, now + delay);
+                osc.frequency.exponentialRampToValueAtTime(80, now + delay + 0.35);
+                
+                gain.gain.setValueAtTime(0.35, now + delay);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.35);
+                
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+                
+                osc.start(now + delay);
+                noiseNode.start(now + delay);
+                osc.stop(now + delay + 0.35);
+                noiseNode.stop(now + delay + 0.3);
+            }
+        }
+
+        // ============================================
+        // SISTEMA DE GRIETAS
+        // ============================================
+        function createCrack(x, y) {
+            const rect = cracksContainer.getBoundingClientRect();
+            const relX = ((x - rect.left) / rect.width) * 100;
+            const relY = ((y - rect.top) / rect.height) * 100;
+            
+            const crack = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            crack.classList.add('crack');
+            
+            const baseSize = 70;
+            const size = baseSize + (clickCount * 22);
+            crack.setAttribute('width', size);
+            crack.setAttribute('height', size);
+            crack.setAttribute('viewBox', '0 0 100 100');
+            
+            crack.style.left = relX + '%';
+            crack.style.top = relY + '%';
+            
+            const rotation = Math.random() * 360;
+            
+            const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            
+            const numCracks = 6 + Math.floor(Math.random() * 3);
+            for (let i = 0; i < numCracks; i++) {
+                const angle = (360 / numCracks) * i + Math.random() * 35;
+                const length = 35 + Math.random() * 35;
+                const endX = 50 + Math.cos(angle * Math.PI / 180) * length;
+                const endY = 50 + Math.sin(angle * Math.PI / 180) * length;
+                
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                const midX = 50 + Math.cos(angle * Math.PI / 180) * (length * 0.6);
+                const midY = 50 + Math.sin(angle * Math.PI / 180) * (length * 0.6);
+                const ctrlX = midX + (Math.random() - 0.5) * 12;
+                const ctrlY = midY + (Math.random() - 0.5) * 12;
+                
+                path.setAttribute('d', `M50,50 Q${ctrlX},${ctrlY} ${endX},${endY}`);
+                path.setAttribute('stroke', 'rgba(255,255,255,0.95)');
+                path.setAttribute('stroke-width', Math.random() * 1.8 + 1.8);
+                path.setAttribute('fill', 'none');
+                path.setAttribute('stroke-linecap', 'round');
+                
+                g.appendChild(path);
+            }
+            
+            g.setAttribute('transform', `rotate(${rotation} 50 50)`);
+            crack.appendChild(g);
+            cracksContainer.appendChild(crack);
+        }
+
+        // ============================================
+        // PARTÍCULAS DE ESCAPE
+        // ============================================
+        function createEscapeParticles() {
+            for (let i = 0; i < 60; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.classList.add('escape-particle');
+                    
+                    const centerX = window.innerWidth / 2;
+                    const centerY = window.innerHeight / 2;
+                    
+                    particle.style.left = centerX + 'px';
+                    particle.style.top = centerY + 'px';
+                    
+                    document.body.appendChild(particle);
+                    
+                    const angle = Math.random() * Math.PI * 2;
+                    const velocity = 2.5 + Math.random() * 3.5;
+                    const life = 1200 + Math.random() * 1200;
+                    
+                    let posX = centerX;
+                    let posY = centerY;
+                    
+                    const startTime = Date.now();
+                    
+                    function animateParticle() {
+                        const elapsed = Date.now() - startTime;
+                        if (elapsed > life) {
+                            particle.remove();
+                            return;
+                        }
+                        
+                        posX += Math.cos(angle) * velocity;
+                        posY += Math.sin(angle) * velocity;
+                        
+                        particle.style.left = posX + 'px';
+                        particle.style.top = posY + 'px';
+                        particle.style.opacity = 1 - (elapsed / life);
+                        
+                        requestAnimationFrame(animateParticle);
+                    }
+                    
+                    animateParticle();
+                }, i * 18);
+            }
+        }
+
+        // ============================================
+        // BOTÓN DE INICIO
+        // ============================================
+        audioStartButton.addEventListener('click', async () => {
+            await initAudio();
+            startMusicLoop();
+            audioStartButton.style.display = 'none';
+        });
+
+        // ============================================
+        // MANEJO DE CLICKS
+        // ============================================
+        clickLayer.addEventListener('click', (e) => {
+            if (clickCount >= maxClicks) return;
+            
+            clickCount++;
+            
+            const integrity = Math.max(0, 100 - (clickCount * (100 / maxClicks)));
+            integrityValue.textContent = Math.round(integrity);
+            
+            createCrack(e.clientX, e.clientY);
+            playCrackSound();
+            
+            if (clickCount === maxClicks) {
+                setTimeout(() => {
+                    cracksContainer.innerHTML = '';
+                    shatteredGlass.classList.add('visible');
+                    
+                    playShatterSound();
+                    stopEmergencyMusic();
+                    
+                    setTimeout(() => {
+                        playSafeMusic();
+                    }, 1000);
+                    
+                    alarmFlash.classList.add('safe');
+                    error404.classList.add('safe');
+                    messageEl.classList.add('safe');
+                    integrityCounter.classList.add('safe');
+                    leftPanel.classList.add('safe');
+                    rightPanel.classList.add('safe');
+                    hudOverlay.classList.add('safe');
+                    
+                    messageEl.textContent = '✓ EVACUACIÓN EXITOSA - ESTÁS A SALVO';
+                    leftPanel.innerHTML = '✓ ESCAPE COMPLETE<br><span style="font-size: 0.75em; opacity: 0.85;">STATUS: SAFE</span>';
+                    rightPanel.innerHTML = '✓ LIFE SUPPORT<br><span style="font-size: 0.75em; opacity: 0.85;">STATUS: STABLE</span>';
+                    
+                    const corners = hudOverlay.querySelectorAll('.hud-corner');
+                    corners[0].innerHTML = 'VIEWPORT A-7<br>STATUS: BREACHED';
+                    corners[1].innerHTML = 'PRESSURE: 1.0 BAR<br>TEMP: 21°C';
+                    corners[2].innerHTML = 'SAFE ZONE<br>ALT: 500m';
+                    corners[3].innerHTML = 'SUIT INTACT<br>EVAC: SUCCESS';
+                    
+                    createEscapeParticles();
+                    
+                    clickLayer.style.pointerEvents = 'none';
+                    clickLayer.style.cursor = 'default';
+                }, 150);
+            }
+        });
+
+        // ============================================
+        // RESPONSIVE
+        // ============================================
+        window.addEventListener('resize', () => {
+            const newSize = Math.min(window.innerWidth, window.innerHeight) * 0.52;
+            renderer.setSize(newSize, newSize);
+            shaderMaterial.uniforms.resolution.value.set(newSize, newSize);
+        });
+    </script>
 </body>
 </html>
+
